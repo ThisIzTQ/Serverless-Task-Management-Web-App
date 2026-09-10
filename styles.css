@@ -45,7 +45,7 @@ input{
     outline: none;
     background: transparent;
     padding: 10px;
-    font-weight: 14px;
+    font-size: 14px;
 }
 button{
     border: none;
@@ -94,8 +94,14 @@ ul li span{
     color: #555;
     line-height: 40px;
     text-align: center;
-    border: ;
+    border-radius: 50%;
 }
 ul li span:hover{
     background: #edeef0;
+}
+footer{
+    background-color: #153677;
+    text-align: center;
+    color: #c6c2c7;
+    margin-top: auto;
 }
