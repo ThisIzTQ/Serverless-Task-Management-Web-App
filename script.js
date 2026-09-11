@@ -1,4 +1,4 @@
-const STORAGE_KEY = "task-manager.tasks.v1";
+const API_URL = "https://p3j1eu0y4h.execute-api.ap-south-1.amazonaws.com/tasks";
 const taskForm = document.getElementById("task-form");
 const titleInput = document.getElementById("task-title");
 const priorityInput = document.getElementById("task-priority");
@@ -11,25 +11,40 @@ const taskCount = document.getElementById("task-count");
 const completedCount = document.getElementById("completed-count");
 const filterButtons = document.querySelectorAll(".filter");
 
-let tasks = loadTasks();
+let tasks = [];
 let activeFilter = "all";
 let editingTaskId = null;
 
-function loadTasks() {
-    try {
-        const savedTasks = JSON.parse(localStorage.getItem(STORAGE_KEY));
-        return Array.isArray(savedTasks) ? savedTasks : [];
-    } catch {
-        return [];
+async function request(path = "", options = {}) {
+    const response = await fetch(`${API_URL}${path}`, {
+        headers: { "Content-Type": "application/json" },
+        ...options,
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+        throw new Error(data.message || "The task request failed.");
     }
+
+    return data;
 }
 
-function saveTasks() {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
+function showError(message) {
+    emptyState.hidden = false;
+    emptyState.textContent = message;
 }
 
-function createTaskId() {
-    return crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+async function loadTasks() {
+    emptyState.hidden = false;
+    emptyState.textContent = "Loading tasks...";
+
+    try {
+        tasks = await request();
+        renderTasks();
+    } catch (error) {
+        console.error(error);
+        showError("Unable to load tasks. Please refresh and try again.");
+    }
 }
 
 function formatDueDate(date) {
@@ -86,17 +101,33 @@ function renderTasks() {
     emptyState.hidden = filteredTasks.length > 0;
 }
 
-function toggleTask(id) {
-    tasks = tasks.map((task) => task.id === id ? { ...task, completed: !task.completed } : task);
-    saveTasks();
-    renderTasks();
+async function toggleTask(id) {
+    const task = tasks.find((item) => item.id === id);
+    if (!task) return;
+
+    try {
+        const updatedTask = await request(`/${id}`, {
+            method: "PUT",
+            body: JSON.stringify({ ...task, completed: !task.completed }),
+        });
+        tasks = tasks.map((item) => item.id === id ? updatedTask : item);
+        renderTasks();
+    } catch (error) {
+        console.error(error);
+        showError("Unable to update the task. Please try again.");
+    }
 }
 
-function deleteTask(id) {
-    tasks = tasks.filter((task) => task.id !== id);
-    if (editingTaskId === id) resetForm();
-    saveTasks();
-    renderTasks();
+async function deleteTask(id) {
+    try {
+        await request(`/${id}`, { method: "DELETE" });
+        tasks = tasks.filter((task) => task.id !== id);
+        if (editingTaskId === id) resetForm();
+        renderTasks();
+    } catch (error) {
+        console.error(error);
+        showError("Unable to delete the task. Please try again.");
+    }
 }
 
 function startEditing(id) {
@@ -119,19 +150,31 @@ function resetForm() {
     cancelEditButton.hidden = true;
 }
 
-taskForm.addEventListener("submit", (event) => {
+taskForm.addEventListener("submit", async (event) => {
     event.preventDefault();
     const title = titleInput.value.trim();
     if (!title) return;
     const taskData = { title, priority: priorityInput.value, dueDate: dueDateInput.value };
-    if (editingTaskId) {
-        tasks = tasks.map((task) => task.id === editingTaskId ? { ...task, ...taskData } : task);
-    } else {
-        tasks.unshift({ id: createTaskId(), ...taskData, completed: false, createdAt: new Date().toISOString() });
+    try {
+        if (editingTaskId) {
+            const updatedTask = await request(`/${editingTaskId}`, {
+                method: "PUT",
+                body: JSON.stringify({ ...taskData, completed: tasks.find((task) => task.id === editingTaskId).completed }),
+            });
+            tasks = tasks.map((task) => task.id === editingTaskId ? updatedTask : task);
+        } else {
+            const newTask = await request("", {
+                method: "POST",
+                body: JSON.stringify(taskData),
+            });
+            tasks.unshift(newTask);
+        }
+        resetForm();
+        renderTasks();
+    } catch (error) {
+        console.error(error);
+        showError("Unable to save the task. Please try again.");
     }
-    saveTasks();
-    resetForm();
-    renderTasks();
 });
 
 cancelEditButton.addEventListener("click", resetForm);
@@ -141,4 +184,4 @@ filterButtons.forEach((button) => button.addEventListener("click", () => {
     renderTasks();
 }));
 
-renderTasks();
+loadTasks();
