@@ -43,7 +43,7 @@ async function loadTasks() {
         renderTasks();
     } catch (error) {
         console.error(error);
-        showError("Unable to load tasks. Please refresh and try again.");
+        showError(`Unable to load tasks: ${error.message}`);
     }
 }
 
@@ -114,7 +114,7 @@ async function toggleTask(id) {
         renderTasks();
     } catch (error) {
         console.error(error);
-        showError("Unable to update the task. Please try again.");
+        showError(`Unable to update the task: ${error.message}`);
     }
 }
 
@@ -126,7 +126,7 @@ async function deleteTask(id) {
         renderTasks();
     } catch (error) {
         console.error(error);
-        showError("Unable to delete the task. Please try again.");
+        showError(`Unable to delete the task: ${error.message}`);
     }
 }
 
@@ -173,7 +173,7 @@ taskForm.addEventListener("submit", async (event) => {
         renderTasks();
     } catch (error) {
         console.error(error);
-        showError("Unable to save the task. Please try again.");
+        showError(`Unable to save the task: ${error.message}`);
     }
 });
 

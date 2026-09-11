@@ -183,7 +183,18 @@ ul li span:hover{
     accent-color: #153677;
 }
 .task-details { display: grid; gap: 4px; }
-.task-meta { color: #64748b; font-size: 13px; text-transform: capitalize; }
+.task-meta {
+    position: static;
+    width: auto;
+    height: auto;
+    color: #64748b;
+    background: transparent;
+    font-size: 13px;
+    line-height: normal;
+    text-align: left;
+    text-transform: capitalize;
+}
+.task-item .task-meta:hover { background: transparent; }
 .task-item.checked strong { color: #64748b; text-decoration: line-through; }
 .task-actions { display: flex; gap: 8px; }
 .task-actions button { padding: 8px 10px; font-size: 13px; }
