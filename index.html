@@ -4,22 +4,44 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="styles.css">
-    <title>To Do list</title>
+    <title>Task Manager</title>
 </head>
 <body>
     <div class="container">
-        <div class="todo-app">
-            <h2>To-Do List <img src="img/todo_icon-removebg-preview.png" alt="Todo Icon"></h2>
-            <div class="row">
-                <input type="text" id="input-box" placeholder="Add Task">
-                <button onclick=addTask()>Add</button>
-            </div>
-            <ul id="list">
-                <!-- <li class="checked">Task1</li>    
-                <li>Task2</li>
-                <li>Task3</li>             -->
-            </ul>
-        </div>
+        <main class="todo-app">
+            <h1>Task Manager <img src="img/todo_icon-removebg-preview.png" alt="Task checklist icon"></h1>
+
+            <form id="task-form" class="task-form">
+                <label class="sr-only" for="task-title">Task title</label>
+                <input type="text" id="task-title" placeholder="What needs to be done?" maxlength="120" required>
+                <div class="task-options">
+                    <label for="task-priority">Priority</label>
+                    <select id="task-priority">
+                        <option value="low">Low</option>
+                        <option value="medium" selected>Medium</option>
+                        <option value="high">High</option>
+                    </select>
+                    <label for="task-due-date">Due date</label>
+                    <input type="date" id="task-due-date">
+                </div>
+                <div class="row">
+                    <button id="submit-task" type="submit">Add task</button>
+                    <button id="cancel-edit" class="secondary-button" type="button" hidden>Cancel edit</button>
+                </div>
+            </form>
+
+            <section class="task-summary" aria-label="Task summary">
+                <span id="task-count">0 tasks</span>
+                <span id="completed-count">0 completed</span>
+            </section>
+            <nav class="filters" aria-label="Task filters">
+                <button type="button" class="filter active" data-filter="all">All</button>
+                <button type="button" class="filter" data-filter="active">Active</button>
+                <button type="button" class="filter" data-filter="completed">Completed</button>
+            </nav>
+            <p id="empty-state" class="empty-state">No tasks yet. Add your first task above.</p>
+            <ul id="list" aria-live="polite"></ul>
+        </main>
     </div>
     <script src="script.js"></script>
     <footer>All Rights Reserved</footer>
